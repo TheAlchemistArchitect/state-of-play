@@ -1,0 +1,10 @@
+import 'dotenv/config';
+import { REST, Routes, SlashCommandBuilder } from 'discord.js';
+import { loadConfig } from '../src/config/env.js';
+const config = loadConfig();
+if (!config.discordToken || !config.discordApplicationId) throw new Error('Set DISCORD_BOT_TOKEN and DISCORD_APPLICATION_ID');
+const commands = [new SlashCommandBuilder().setName('status').setDescription('Show MYCELIUM CORE health and mode'), new SlashCommandBuilder().setName('help').setDescription('Show available Phase 1 commands')];
+const rest = new REST({ version: '10' }).setToken(config.discordToken);
+const route = config.discordGuildId ? Routes.applicationGuildCommands(config.discordApplicationId, config.discordGuildId) : Routes.applicationCommands(config.discordApplicationId);
+await rest.put(route, { body: commands.map(c => c.toJSON()) });
+console.log('Registered /status and /help without printing secrets.');

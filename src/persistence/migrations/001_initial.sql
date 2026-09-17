@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS candidates (id INTEGER PRIMARY KEY, mint TEXT NOT NULL, discovered_at TEXT NOT NULL, status TEXT NOT NULL, score REAL, rejection_reason TEXT, UNIQUE(mint));
+CREATE TABLE IF NOT EXISTS positions (id INTEGER PRIMARY KEY, mint TEXT NOT NULL UNIQUE, quantity TEXT NOT NULL, entry_price_usd REAL, entry_value_sol REAL, opened_at TEXT NOT NULL, status TEXT NOT NULL, realized_pnl_sol REAL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS trades (id INTEGER PRIMARY KEY, client_id TEXT NOT NULL UNIQUE, mint TEXT NOT NULL, side TEXT NOT NULL, status TEXT NOT NULL, quantity TEXT, price_usd REAL, value_sol REAL, signature TEXT, fee_lamports INTEGER, slippage_bps REAL, created_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS signals (id INTEGER PRIMARY KEY, candidate_id INTEGER, name TEXT NOT NULL, value REAL, explanation TEXT, observed_at TEXT NOT NULL, FOREIGN KEY(candidate_id) REFERENCES candidates(id));
+CREATE TABLE IF NOT EXISTS wallets (address TEXT PRIMARY KEY, label TEXT, first_seen_at TEXT NOT NULL, last_seen_at TEXT NOT NULL, metadata_json TEXT);
+CREATE TABLE IF NOT EXISTS wallet_relationships (id INTEGER PRIMARY KEY, wallet_a TEXT NOT NULL, wallet_b TEXT NOT NULL, relationship TEXT NOT NULL, confidence REAL NOT NULL, observed_at TEXT NOT NULL, UNIQUE(wallet_a, wallet_b, relationship));
+CREATE TABLE IF NOT EXISTS creators (address TEXT PRIMARY KEY, risk_score REAL, history_json TEXT, analyzed_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS token_security (mint TEXT PRIMARY KEY, mint_authority TEXT, freeze_authority TEXT, token2022 INTEGER NOT NULL DEFAULT 0, extensions_json TEXT, holder_concentration REAL, liquidity_usd REAL, hard_rejected INTEGER NOT NULL DEFAULT 0, rejection_reasons_json TEXT, observed_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS market_snapshots (id INTEGER PRIMARY KEY, mint TEXT NOT NULL, price_usd REAL, liquidity_usd REAL, volume_usd REAL, holders INTEGER, observed_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS learning_events (id INTEGER PRIMARY KEY, candidate_id INTEGER, classification TEXT, outcome_json TEXT, created_at TEXT NOT NULL, FOREIGN KEY(candidate_id) REFERENCES candidates(id));
+CREATE TABLE IF NOT EXISTS model_versions (version TEXT PRIMARY KEY, status TEXT NOT NULL, metrics_json TEXT, created_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS system_events (id INTEGER PRIMARY KEY, level TEXT NOT NULL, event TEXT NOT NULL, details_json TEXT, created_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS risk_events (id INTEGER PRIMARY KEY, rule TEXT NOT NULL, action TEXT NOT NULL, mint TEXT, details_json TEXT, created_at TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_candidates_status_score ON candidates(status, score DESC);
+CREATE INDEX IF NOT EXISTS idx_trades_created_at ON trades(created_at);
